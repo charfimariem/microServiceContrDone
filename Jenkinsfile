@@ -6,6 +6,9 @@ pipeline {
         DOCKERHUB_CREDENTIALS = credentials('DockerHub')
         NODEJS_PATH = "C:\\Program Files (x86)\\nodejs"
     }
+    tools {
+        git 'Default' // Nom de l'installation Git configurée
+    }
     stages {
         stage('Install Node.js and npm') {
             steps {
@@ -18,12 +21,11 @@ pipeline {
         stage('Install express et Dependencies') {
             steps {
                 script {
-                 bat "npm install express"
-                 bat "npm install"
+                    bat "npm install express"
+                    bat "npm install"
                 }
             }
         }
-
         stage('Checkout') {
             steps {
                 script {
@@ -31,23 +33,18 @@ pipeline {
                 }
             }
         }
-
         stage('Build & rename Docker Image') {
             steps {
                 script {
-                    // Construisez l'image Docker
                     bat "docker build -t mariem293/appbackend:latest ."
-                    
                 }
             }
         }
-
         stage('Deploy Docker image') {
             steps {
                 script {
-                    // Push Docker image to Docker Hub
-                     docker.withRegistry('https://index.docker.io/v1/', '14') {
-                        // Push both the latest and tagged images
+                    echo "Using DockerHub credentials ID: DockerHub"
+                    docker.withRegistry('https://index.docker.io/v1/', 'DockerHub') {
                         docker.image('mariem293/appbackend:latest').push()
                     }
                 }
