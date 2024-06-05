@@ -1,14 +1,11 @@
-
 pipeline {
     agent any
-
     environment {
-        DOCKER_PATH = "/usr/bin/docker"
-        NODEJS_PATH = "/usr/bin/nodejs"
-        PATH = "${DOCKER_PATH}:${NODEJS_PATH}:${PATH}"
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub') // Assurez-vous que les informations d'identification Docker Hub sont correctes
+        DOCKER_PATH = "C:\\Program Files\\Docker\\cli-plugins"
+        PATH = "${DOCKER_PATH}:${PATH}"
+        //DOCKERHUB_CREDENTIALS = credentials('DockerHub')
+        NODEJS_PATH = "C:\\Program Files (x86)\\nodejs"
     }
-
     stages {
         stage('Install Node.js and npm') {
             steps {
@@ -18,12 +15,11 @@ pipeline {
                 }
             }
         }
-
         stage('Install express et Dependencies') {
             steps {
                 script {
-                    sh "npm install express"
-                    sh "npm install"
+                 bat "npm install express"
+                 bat "npm install"
                 }
             }
         }
@@ -36,12 +32,12 @@ pipeline {
             }
         }
 
-        stage('Build & tag Docker Image') {
+        stage('Build & rename Docker Image') {
             steps {
                 script {
-                    // Construire et marquer l'image Docker
-                    sh "docker build -t mariem293/my-node-app ."
-                    sh "docker tag my-node-app mariem293/my-node-app ." // Remplacez <image_id> par l'ID de l'image Docker construite
+                    // Construisez l'image Docker
+                    bat "docker build -t mariem293/appbackend:latest ."
+                    
                 }
             }
         }
@@ -49,19 +45,11 @@ pipeline {
         stage('Deploy Docker image') {
             steps {
                 script {
-                    // Déployer l'image Docker sur Docker Hub
-                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub') {
-                        docker.image('mariem293/my-node-app .').push()
+                    // Push Docker image to Docker Hub
+                     docker.withRegistry('https://index.docker.io/v1/', '14') {
+                        // Push both the latest and tagged images
+                        docker.image('mariem293/appbackend:latest').push()
                     }
-                }
-            }
-        }
-
-        stage('Deploy with docker-compose') {
-            steps {
-                script {
-                    // Déployer avec docker-compose
-                    sh "docker-compose up -d"
                 }
             }
         }
