@@ -1,0 +1,9 @@
+global:
+  scrape_interval:     15s 
+  evaluation_interval: 15s 
+
+scrape_configs:
+  - job_name: 'etudient-micro'  
+    static_configs:
+      - targets: ['192.168.1.188:5050'] 
+    metrics_path: /metrics 

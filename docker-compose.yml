@@ -1,0 +1,47 @@
+version: "3.8"
+
+services:
+  nodejs-api:
+    image: appbackend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: appbackendcontenaire
+    depends_on:
+      - db
+    volumes:
+      - .:/usr/src/app
+    ports:
+      - "5050:5050"
+    networks:
+      - app_network
+    environment:
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_NAME=isett2
+      - PORT=5050
+
+  db:
+    image: mysql:5.7
+    container_name: mysql-container
+    restart: always
+    environment:
+      MYSQL_DATABASE: isett2
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_PASSWORD: root
+    command: --init-file /docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "3306:3306"
+    networks:
+      - app_network
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+networks:
+  app_network:
+    driver: bridge
+
+volumes:
+  db_data:

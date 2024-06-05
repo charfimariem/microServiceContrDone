@@ -1,0 +1,2 @@
+CREATE DATABASE IF NOT EXISTS isett2;
+USE isett2;
