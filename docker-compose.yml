@@ -2,11 +2,11 @@ version: "3.8"
 
 services:
   nodejs-api:
-    image: appbackend
+    image: appbackend_jenkins
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: appbackendcontenaire
+    container_name: appbackendcontenaire_jenkins
     depends_on:
       - db
     volumes:
@@ -24,7 +24,7 @@ services:
 
   db:
     image: mysql:5.7
-    container_name: mysql-container
+    container_name: mysql-container_jenkins
     restart: always
     environment:
       MYSQL_DATABASE: isett2
