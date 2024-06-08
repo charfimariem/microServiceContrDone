@@ -50,5 +50,13 @@ pipeline {
                 }
             }
         }
+        stage('Deploy with docker-compose ') {
+            steps {
+                script {
+        
+                    bat "docker-compose up"
+                }
+            }
+        }
     }
 }

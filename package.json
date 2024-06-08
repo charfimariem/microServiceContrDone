@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "start": "node index.js",
+    "sonarqube": "sonar-scanner"
   },
   "keywords": [],
   "author": "",
@@ -19,5 +20,8 @@
     "mysql2": "^3.9.8",
     "pg": "^8.11.3",
     "prom-client": "^15.1.2"
+  },
+  "devDependencies": {
+    "sonarqube-scanner": "^4.0.1"
   }
 }
