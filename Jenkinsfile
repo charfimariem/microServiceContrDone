@@ -8,13 +8,14 @@ pipeline {
     }
     tools {
         git 'Default' // Nom de l'installation Git configurée
+        nodejs 'NODEJS' // Assurez-vous que 'NODEJS' correspond exactement au nom de votre installation NodeJS dans Jenkins
     }
     stages {
         stage('Install Node.js and npm') {
             steps {
                 script {
-                    def nodejs = tool name: 'NODEJS', type: 'jenkins.plugins.nodejs.tools.NodeJSInstallation'
-                    env.PATH = "${nodejs}/bin:${env.PATH}"
+                    def nodejsHome = tool 'NODEJS'
+                    env.PATH = "${nodejsHome}/bin:${env.PATH}"
                 }
             }
         }
@@ -50,32 +51,12 @@ pipeline {
                 }
             }
         }
-        stage('Test with Jest') {
+        stage('SonarQube test') {
             steps {
                 script {
-                    bat "npm test"
-                }
-            }
-        }
-        stage('Run Postman tests') {
-            steps {
-                script {
-                    // Ici, vous pouvez appeler Postman pour exécuter vos tests
-                    // Assurez-vous que Postman est installé et configuré sur votre système
-                    // Exemple d'exécution de tests Postman :
-                    // newman run path/to/your/collection.json -e path/to/your/environment.json
-                }
-            }
-        }
-        stage('Run SonarQube analysis') {
-            steps {
-                script {
-                    // Exécutez l'analyse SonarQube sur votre code
-                    // Assurez-vous que SonarQube Scanner est configuré sur votre Jenkins
-                    // Exemple :
-                    // withSonarQubeEnv('SonarQubeServer') {
-                    //     bat "sonar-scanner"
-                    // }
+                    withSonarQubeEnv('SonarQube Test') {
+                        bat 'npm run sonarqube'
+                    }
                 }
             }
         }
@@ -87,5 +68,4 @@ pipeline {
             }
         }
     }
-    
 }
