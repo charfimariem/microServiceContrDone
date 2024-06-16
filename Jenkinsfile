@@ -50,13 +50,42 @@ pipeline {
                 }
             }
         }
-        stage('Deploy with docker-compose ') {
+        stage('Test with Jest') {
             steps {
                 script {
-        
+                    bat "npm test"
+                }
+            }
+        }
+        stage('Run Postman tests') {
+            steps {
+                script {
+                    // Ici, vous pouvez appeler Postman pour exécuter vos tests
+                    // Assurez-vous que Postman est installé et configuré sur votre système
+                    // Exemple d'exécution de tests Postman :
+                    // newman run path/to/your/collection.json -e path/to/your/environment.json
+                }
+            }
+        }
+        stage('Run SonarQube analysis') {
+            steps {
+                script {
+                    // Exécutez l'analyse SonarQube sur votre code
+                    // Assurez-vous que SonarQube Scanner est configuré sur votre Jenkins
+                    // Exemple :
+                    // withSonarQubeEnv('SonarQubeServer') {
+                    //     bat "sonar-scanner"
+                    // }
+                }
+            }
+        }
+        stage('Deploy with docker-compose') {
+            steps {
+                script {
                     bat "docker-compose up"
                 }
             }
         }
     }
+    
 }

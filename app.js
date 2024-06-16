@@ -2,16 +2,18 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mysql = require('mysql');
 const cors = require('cors');
-
-const app = express();
-const port = 5050;
-app.use(bodyParser.json());
-app.use(cors());
-const client = require('prom-client')
+const client = require('prom-client');
 const dotenv = require('dotenv');
 
 // Charger les variables d'environnement depuis le fichier .env
 dotenv.config();
+
+const app = express();
+const port = 5050;
+
+// Middleware
+app.use(bodyParser.json());
+app.use(cors());
 
 // Enable Prometheus metrics collection
 const register = new client.Registry();
@@ -49,17 +51,13 @@ app.get('/metrics', async (req, res) => {
   }
 });
 
-
-
+// Database connection
 const db = mysql.createConnection({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME
 });
-
-
-
 
 db.connect(err => {
   if (err) {
@@ -69,11 +67,10 @@ db.connect(err => {
   console.log('Connecté à la base de données MySQL');
 });
 
-
+// Routes
 app.get('/', (req, res) => {
   res.send('Welcome to the API');
 });
-
 
 app.get('/etudiant', (req, res) => {
   const query = 'SELECT * FROM etudiant';
@@ -83,18 +80,20 @@ app.get('/etudiant', (req, res) => {
   });
 });
 
-app.post('/etudiant', async (req, res) => {
+app.post('/etudiant', (req, res) => {
   const { cin, nom, prenom, numtel, email, department, classe, password } = req.body;
-  try {
-    await pool.query('INSERT INTO etudiant (cin, nom, prenom, numtel, email, department, classe, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [cin, nom, prenom, numtel, email, department, classe, password]);
-    res.status(201).json({ message: 'Student added successfully' });
-  } catch (error) {
-    console.error('Error adding student:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
+  const query = 'INSERT INTO etudiant (cin, nom, prenom, numtel, email, department, classe, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+  db.query(query, [cin, nom, prenom, numtel, email, department, classe, password], (err, result) => {
+    if (err) {
+      console.error('Error adding student:', err);
+      res.status(500).json({ error: 'Internal Server Error' });
+    } else {
+      res.status(201).json({ message: 'Student added successfully' });
+    }
+  });
 });
 
-
+// Start server
 app.listen(port, () => {
   console.log(`Server listening at http://localhost:${port}`);
 });
