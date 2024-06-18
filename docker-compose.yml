@@ -12,7 +12,7 @@ services:
     volumes:
       - .:/usr/src/app
     ports:
-      - "5050:5050"
+      - "3307:3306"
     networks:
       - app_network
     environment:
