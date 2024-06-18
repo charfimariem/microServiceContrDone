@@ -2,7 +2,7 @@ pipeline {
     agent any
     environment {
         DOCKER_PATH = "C:\\Program Files\\Docker\\cli-plugins"
-        PATH = "${DOCKER_PATH}:${PATH}"
+        PATH = "${DOCKER_PATH}:${env.PATH}"
         DOCKERHUB_CREDENTIALS = credentials('DockerHub')
         NODEJS_PATH = "C:\\Program Files (x86)\\nodejs"
     }
@@ -19,18 +19,18 @@ pipeline {
                 }
             }
         }
+        stage('Checkout') {
+            steps {
+                script {
+                    checkout scm
+                }
+            }
+        }
         stage('Install express et Dependencies') {
             steps {
                 script {
                     bat "npm install express"
                     bat "npm install"
-                }
-            }
-        }
-        stage('Checkout') {
-            steps {
-                script {
-                    checkout scm
                 }
             }
         }
