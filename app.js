@@ -2,35 +2,35 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mysql = require('mysql');
 const cors = require('cors');
-const client = require('prom-client');
+const promClient = require('prom-client'); // Import prom-client library
 const dotenv = require('dotenv');
 
-// Charger les variables d'environnement depuis le fichier .env
+// Load environment variables from .env file
 dotenv.config();
 
 const app = express();
-const port = 5050;
+const port = process.env.PORT || 5050; // Use PORT from environment variables or default to 5050
 
 // Middleware
 app.use(bodyParser.json());
 app.use(cors());
 
 // Enable Prometheus metrics collection
-const register = new client.Registry();
-client.collectDefaultMetrics({ register });
+const register = new promClient.Registry();
+promClient.collectDefaultMetrics({ register });
 
-// Create a histogram metric for etudiant-ms service
-const etudiantRequestDurationMicroseconds = new client.Histogram({
+// Create a histogram metric for request duration
+const etudiantRequestDurationMicroseconds = new promClient.Histogram({
   name: 'etudiant_request_duration_seconds',
   help: 'Duration of etudiant-ms service HTTP requests in microseconds',
   labelNames: ['method', 'route', 'code'],
   buckets: [0.1, 0.3, 0.5, 0.7, 1, 3, 5, 7, 10]
 });
 
-// Register the histogram for etudiant-ms service
+// Register the histogram metric
 register.registerMetric(etudiantRequestDurationMicroseconds);
 
-// Middleware to measure request duration for etudiant-ms service
+// Middleware to measure request duration
 app.use((req, res, next) => {
   const end = etudiantRequestDurationMicroseconds.startTimer();
   res.on('finish', () => {
@@ -61,10 +61,10 @@ const db = mysql.createConnection({
 
 db.connect(err => {
   if (err) {
-    console.error('Erreur de connexion à la base de données : ' + err.stack);
+    console.error('Error connecting to database:', err.stack);
     return;
   }
-  console.log('Connecté à la base de données MySQL');
+  console.log('Connected to MySQL database');
 });
 
 // Routes
@@ -75,7 +75,11 @@ app.get('/', (req, res) => {
 app.get('/etudiant', (req, res) => {
   const query = 'SELECT * FROM etudiant';
   db.query(query, (err, results) => {
-    if (err) throw err;
+    if (err) {
+      console.error('Error querying database:', err);
+      res.status(500).json({ error: 'Internal Server Error' });
+      return;
+    }
     res.json(results);
   });
 });
@@ -87,9 +91,9 @@ app.post('/etudiant', (req, res) => {
     if (err) {
       console.error('Error adding student:', err);
       res.status(500).json({ error: 'Internal Server Error' });
-    } else {
-      res.status(201).json({ message: 'Student added successfully' });
+      return;
     }
+    res.status(201).json({ message: 'Student added successfully' });
   });
 });
 

@@ -32,7 +32,7 @@ services:
       MYSQL_PASSWORD: root
     command: --init-file /docker-entrypoint-initdb.d/init.sql
     ports:
-      - "3306:3306"
+      - "5050:5050"
     networks:
       - app_network
     volumes:
