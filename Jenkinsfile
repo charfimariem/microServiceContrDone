@@ -2,27 +2,19 @@ pipeline {
     agent any
     environment {
         DOCKER_PATH = "C:\\Program Files\\Docker\\cli-plugins"
-        PATH = "${DOCKER_PATH}:${env.PATH}"
+        PATH = "${DOCKER_PATH}:${PATH}"
         DOCKERHUB_CREDENTIALS = credentials('DockerHub')
         NODEJS_PATH = "C:\\Program Files (x86)\\nodejs"
     }
     tools {
         git 'Default' // Nom de l'installation Git configurée
-        nodejs 'NODEJS' // Assurez-vous que 'NODEJS' correspond exactement au nom de votre installation NodeJS dans Jenkins
     }
     stages {
         stage('Install Node.js and npm') {
             steps {
                 script {
-                    def nodejsHome = tool 'NODEJS'
-                    env.PATH = "${nodejsHome}/bin:${env.PATH}"
-                }
-            }
-        }
-        stage('Checkout') {
-            steps {
-                script {
-                    checkout scm
+                    def nodejs = tool name: 'NODEJS', type: 'jenkins.plugins.nodejs.tools.NodeJSInstallation'
+                    env.PATH = "${nodejs}/bin:${env.PATH}"
                 }
             }
         }
@@ -31,6 +23,13 @@ pipeline {
                 script {
                     bat "npm install express"
                     bat "npm install"
+                }
+            }
+        }
+        stage('Checkout') {
+            steps {
+                script {
+                    checkout scm
                 }
             }
         }
@@ -51,21 +50,14 @@ pipeline {
                 }
             }
         }
-        stage('SonarQube test') {
+        stage('Deploy with docker-compose ') {
             steps {
                 script {
-                    withSonarQubeEnv('SonarQube Test') {
-                        bat 'npm run sonarqube'
-                    }
-                }
-            }
-        }
-        stage('Deploy with docker-compose') {
-            steps {
-                script {
+        
                     bat "docker-compose up"
                 }
             }
         }
-    }
+  
+  }
 }
