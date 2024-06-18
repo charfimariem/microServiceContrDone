@@ -1,62 +1,51 @@
 pipeline {
     agent any
     environment {
-        DOCKER_PATH = "C:\\Program Files\\Docker\\cli-plugins"
-        PATH = "${DOCKER_PATH}:${PATH}"
         DOCKERHUB_CREDENTIALS = credentials('DockerHub')
-        NODEJS_PATH = "C:\\Program Files (x86)\\nodejs"
-    }
-    tools {
-        git 'Default' // Nom de l'installation Git configurée
     }
     stages {
-        stage('Install Node.js and npm') {
+        stage('Checkout SCM') {
             steps {
-                script {
-                    def nodejs = tool name: 'NODEJS', type: 'jenkins.plugins.nodejs.tools.NodeJSInstallation'
-                    env.PATH = "${nodejs}/bin:${env.PATH}"
-                }
+                checkout scm
             }
         }
-        stage('Install express et Dependencies') {
+        stage('Install Node.js and Dependencies') {
             steps {
                 script {
-                    bat "npm install express"
-                    bat "npm install"
+                    def nodejsHome = tool name: 'NodeJS', type: 'NodeJSInstallation'
+                    env.PATH = "${nodejsHome}/bin:${env.PATH}"
                 }
+                bat 'npm install'
             }
         }
-        stage('Checkout') {
+        stage('Build & Push Docker Image') {
             steps {
                 script {
-                    checkout scm
-                }
-            }
-        }
-        stage('Build & rename Docker Image') {
-            steps {
-                script {
-                    bat "docker build -t mariem293/appbackend:latest ."
-                }
-            }
-        }
-        stage('Deploy Docker image') {
-            steps {
-                script {
-                    echo "Using DockerHub credentials ID: DockerHub"
                     docker.withRegistry('https://index.docker.io/v1/', 'DockerHub') {
-                        docker.image('mariem293/appbackend:latest').push()
+                        def app = docker.build("your_dockerhub_username/appbackend:latest")
+                        app.push()
                     }
                 }
             }
         }
-        stage('Deploy with docker-compose ') {
+        stage('Deploy with docker-compose') {
             steps {
                 script {
-        
-                    bat "docker-compose up"
+                    bat 'docker-compose down' // Ensure previous instances are stopped
+                    bat 'docker-compose up -d'
                 }
             }
+        }
+    }
+    post {
+        always {
+            cleanWs()
+        }
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed!'
         }
     }
 }
