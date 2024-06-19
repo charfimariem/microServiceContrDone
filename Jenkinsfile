@@ -50,11 +50,10 @@ pipeline {
                 }
             }
         }
-        stage('Deploy with docker-compose ') {
+        stage('Deploy with docker-compose') {
             steps {
                 script {
-        
-                    bat "docker-compose up"
+                    bat "docker-compose up -d"
                 }
             }
         }
