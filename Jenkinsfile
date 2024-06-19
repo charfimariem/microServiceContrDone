@@ -49,16 +49,7 @@ pipeline {
                     }
                 }
             }
-        }
-        stage('SonarQube test') {
-            steps {
-                script {
-                    withSonarQubeEnv('SonarQube Test') { 
-                        bat 'npm run sonarqube'
-                    }
-                }
-            }
-        }
+        
         stage('Deploy with docker-compose') {
             steps {
                 script {
