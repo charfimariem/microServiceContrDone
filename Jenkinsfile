@@ -49,7 +49,7 @@ pipeline {
                     }
                 }
             }
-        } // Ajout de cette accolade fermante pour le stage 'Deploy Docker image'
+        }
         stage('Deploy with docker-compose') {
             steps {
                 script {
